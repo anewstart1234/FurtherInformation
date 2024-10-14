@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IP Logger</title>
+</head>
+<body>
+    <h1>Welcome to My Website</h1>
+    <p>Your visit has been logged.</p>
+</body>
+</html>
+mkdir ip-logger
+cd ip-logger
+npm init -y
+npm install express
+// index.js
+const express = require('express');
+const fs = require('fs');
+const app = express();
+const port = 3000;
+
+// Middleware to log IP addresses
+app.use((req, res, next) => {
+    const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+    console.log(`Visitor IP: ${ip}`);
+    
+    // Log IP to a file
+    fs.appendFile('ips.txt', `${new Date().toISOString()} - ${ip}\n`, (err) => {
+        if (err) throw err;
+    });
+    
+    next();
+});
+
+// Serve the HTML page
+app.get('/', (req, res) => {
+    res.sendFile(__dirname + '/index.html');
+});
+
+app.listen(port, () => {
+    console.log(`IP Logger running on port ${port}`);
+});
+
